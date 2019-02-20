@@ -6,35 +6,54 @@ infrastructureConfig:
   iacProvider: CLOUDFORMATION
   infrastructureProvider: AWS
   containerOrchestrationEngine: None
+  parameters:
+  - JDK : ORACLE_JDK8
   includes:
-    - CentOS-7.5
-    - MySQL-5.7
-    - OPEN_JDK8
+     - CentOS-7.5
+     - MySQL-5.7
+     - OpenJDK-8
   provisioners:
-    - name: single-node-deployment
-      remoteRepository: "git@github.com:wso2-support/aws-ei.git"
-      remoteBranch: "6.4.0"
-      description: Provision Infra for running intg tests
-      scripts:
-        - name: 'prod-wso2-ei-scenario-deployment'
-          description: ''
-          type: CLOUDFORMATION
-          file: integrator/Minimum-HA/integrator-ha.yaml
-          inputParameters:
-            parseInfrastructureScript: false
-            KeyPairName: "deployment-prod"
-            CertificateName: "self-signed-cert"
-            DBUsername: "wso2carbon"
-            DBPassword: "DB_Password"
-            ProductVersion: "6.4.0"
-            ElasticSearchEndpoint: "https://search-testgrid-prod-hn2zfvehc7i2edigkxnfjljc6y.us-east-1.es.amazonaws.com"
-            InternalPrepareForTest: "True"
+  - name: single-node-deployment
+    remoteRepository: "git@github.com:wso2-support/aws-ei.git"
+    remoteBranch: "6.4.0"
+    description: Provision Infra for running intg tests
+    scripts:
+    - name: 'prod-wso2-ei-scenario-vfs-be-deployment'
+      description: ''
+      type: CLOUDFORMATION
+      file: integrator/Sample-Backends/vfs-be.yaml
+      inputParameters:
+        KeyPairName: "deployment-prod"
+        AMI: "ami-01b72d1b13ca0b4bc"
+        FTPUserName: "wso2user"
+        FTPUserPassword: "FTPUserPassword"
+    - name: 'prod-wso2-ei-scenario-activemq-be-deployment'
+      description: ''
+      type: CLOUDFORMATION
+      file: integrator/Sample-Backends/activemq-be.yaml
+      inputParameters:
+        KeyPairName: "deployment-prod"
+        AMI: "ami-01b72d1b13ca0b4bc"
+    - name: 'prod-wso2-ei-scenario-deployment'
+      description: ''
+      type: CLOUDFORMATION
+      file: integrator/Minimum-HA/integrator-ha.yaml
+      inputParameters:
+        parseInfrastructureScript: false
+        KeyPairName: "deployment-prod"
+        CertificateName: "self-signed-cert"
+        DBUsername: "wso2carbon"
+        DBPassword: "DB_Password"
+        ProductVersion: "6.4.0"
+        ElasticSearchEndpoint: "https://search-testgrid-prod-hn2zfvehc7i2edigkxnfjljc6y.us-east-1.es.amazonaws.com"
+        InternalPrepareForTest: "True"
 scenarioConfigs:
-  - testType: TESTNG
-    remoteRepository: "https://github.com/sdkottegoda/product-ei.git"
-    remoteBranch: "product-scenarios-dev"
-    name: "ei-scenarios-dev"
-    description: "ei-scenarios-dev"
-    file: product-scenarios/test.sh
-    inputParameters:
-      ProductVersion: "EI-6.4.0"
+- testType: TESTNG
+  remoteRepository: "https://github.com/sdkottegoda/product-ei.git"
+  remoteBranch: "product-scenarios-dev"
+  name: "ei-scenarios-dev"
+  description: "ei-scenarios-dev"
+  file: product-scenarios/test.sh
+  inputParameters:
+    ProductVersion: "EI-6.4.0"
+    RemoteProductDir: "/usr/lib/wso2/wso2ei/6.4.0/wso2ei-6.4.0"
